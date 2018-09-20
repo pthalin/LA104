@@ -20,7 +20,7 @@ Start IAR 6.4 and load the project.
 * Select: Project -> Debug without dowloading.
 * Press "Go"
 * Power cycle device.
-* Press "Go"
 * Press "Break" the delect "Yes" to reset.
 * Set/update beakpoints (eg "disable all" then "enable all")
+* Press "Go"
 * Debug!
