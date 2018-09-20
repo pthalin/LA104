@@ -107,7 +107,7 @@ u8 Save_Bmp(u16 FileNo)
     u32 pDirAddr[1];
     u32 Rvalue = DISK_RW_ERR;
 //  s16 x, y, i = 54, j, ColorH, ColorL;
-    s32 x, y, j, ColorH, ColorL;
+    s32 x, y, ColorH;
     u32 i = 0;
     u16 Tmp = 0;
     u16 k = 0, l = 0;
@@ -215,6 +215,7 @@ u8 Save_Csv(s16 FileNo)
     u8 count;
     u8 CH_Status = 0;
     u32 TransTime = 0;
+    u8 ch;
 
     length = 4096;
 
@@ -232,8 +233,10 @@ u8 Save_Csv(s16 FileNo)
     for(i = TRI_START_NUM; i < RECORD_DEPTH - 3; i++)
     {
         CH_Status = TransStatusData(i);
-        TransTime = TransformTime(i + 1) * 10;
-
+        if (i > TRI_START_NUM)
+        {
+            TransTime += TransformTime(i) * 10;
+        }
         memset(Num, 0, 12);                                              // 时间
         u32ToDecStr(Num, TransTime);
         for(count = 0; count < 12; count++)
@@ -256,14 +259,23 @@ u8 Save_Csv(s16 FileNo)
             k = 0;
         }
 
+        for(ch = 0; ch < 3; ch++)
+        {        
+            memset(Num, 0, 12);                                              // CH1状态
+            Char2Hex(Num, (CH_Status >> ch) & 0x01);
+            for(count = 0; count < 3; count++)
+            {
+                if(Num[count] == 0) break;
+                DiskBuf[k++] = Num[count];
 
-        memset(Num, 0, 12);                                              // CH1状态
-        Char2Hex(Num, CH_Status & 0x01);
-        for(count = 0; count < 3; count++)
-        {
-            if(Num[count] == 0) break;
-            DiskBuf[k++] = Num[count];
-
+                if(k >= length)
+                {
+                    if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
+                    PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
+                    k = 0;
+                }
+            }
+            DiskBuf[k++] = 0x2c;
             if(k >= length)
             {
                 if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
@@ -271,80 +283,7 @@ u8 Save_Csv(s16 FileNo)
                 k = 0;
             }
         }
-        DiskBuf[k++] = 0x2c;
-        if(k >= length)
-        {
-            if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
-            PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
-            k = 0;
-        }
-
-        memset(Num, 0, 12);                                              // CH2状态
-        Char2Hex(Num, (CH_Status >> 1) & 0x01);
-        for(count = 0; count < 3; count++)
-        {
-            if(Num[count] == 0) break;
-            DiskBuf[k++] = Num[count];
-
-            if(k >= length)
-            {
-                if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
-                PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
-                k = 0;
-            }
-        }
-        DiskBuf[k++] = 0x2c;
-        if(k >= length)
-        {
-            if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
-            PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
-            k = 0;
-        }
-
-        memset(Num, 0, 12);                                              // CH3状态
-        Char2Hex(Num, (CH_Status >> 2) & 0x01);
-        for(count = 0; count < 3; count++)
-        {
-            if(Num[count] == 0) break;
-            DiskBuf[k++] = Num[count];
-
-            if(k >= length)
-            {
-                if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
-                PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
-                k = 0;
-            }
-        }
-        DiskBuf[k++] = 0x2c;
-        if(k >= length)
-        {
-            if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
-            PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
-            k = 0;
-        }
-
-        memset(Num, 0, 12);                                              // CH4状态
-        Char2Hex(Num, (CH_Status >> 3) & 0x01);
-        for(count = 0; count < 3; count++)
-        {
-            if(Num[count] == 0) break;
-            DiskBuf[k++] = Num[count];
-
-            if(k >= length)
-            {
-                if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
-                PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
-                k = 0;
-            }
-        }
-        DiskBuf[k++] = 0x2c;
-        if(k >= length)
-        {
-            if(ProgFileSec(DiskBuf, pCluster) != OK) return FILE_RW_ERR; // 写入数据
-            PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
-            k = 0;
-        }
-
+ 
         DiskBuf[k++] = 0x0d;                                             // 回车换行
         if(k >= length)
         {
@@ -359,10 +298,7 @@ u8 Save_Csv(s16 FileNo)
             PrintClk(SAVE_ICO_X0, SAVE_ICO_Y0, (l++ >> 1) & 3);          // 进度指示
             k = 0;
         }
-
-
     }                                                                    // 循环结束
-
 
     if(k != 0)
     {
